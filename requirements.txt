@@ -1,0 +1,10 @@
+pandas
+numpy
+scikit-learn
+torch
+catboost
+lightgbm
+fastai
+wwf
+dill
+git+https://github.com/moexalgo/moexalgo
