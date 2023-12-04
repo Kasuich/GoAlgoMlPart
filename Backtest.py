@@ -6,7 +6,7 @@ import numpy as np
 
 from SimpleDataset import SimpleDataset
 
-import dill
+# import dill
 
 from catboost import CatBoostRegressor
 from sklearn.model_selection import train_test_split
@@ -14,7 +14,7 @@ from lightgbm import LGBMRegressor
 import catboost
 import lightgbm
 from sklearn.metrics import mean_squared_error
-from fastai.tabular.all import *
+# from fastai.tabular.all import *
 import warnings
 import lightgbm as lgb
 warnings.filterwarnings('ignore')
@@ -80,10 +80,10 @@ class Backtest:
             model = lgb.Booster(model_file=model_path)
             self.preds = model.predict(test_data)
 
-        if self.features['model'] == 'tabular_learner':
-            model = load_learner(model_path, cpu=True, pickle_module=dill)
-            test_dl = model.dls.test_dl(test_data)
-            self.preds, _ = model.get_preds(dl = test_dl)
+        # if self.features['model'] == 'tabular_learner':
+        #     model = load_learner(model_path, cpu=True, pickle_module=dill)
+        #     test_dl = model.dls.test_dl(test_data)
+        #     self.preds, _ = model.get_preds(dl = test_dl)
 
         self.sygnals = (self.preds > np.quantile(self.preds, 0.95)) * 1
 

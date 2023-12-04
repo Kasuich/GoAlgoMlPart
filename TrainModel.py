@@ -6,7 +6,7 @@ import numpy as np
 
 from SimpleDataset import SimpleDataset
 
-import dill
+# import dill
 
 from catboost import CatBoostRegressor
 from sklearn.model_selection import train_test_split
@@ -14,7 +14,7 @@ from lightgbm import LGBMRegressor
 import catboost
 import lightgbm
 from sklearn.metrics import mean_squared_error
-from fastai.tabular.all import *
+# from fastai.tabular.all import *
 import warnings
 import lightgbm as lgb
 warnings.filterwarnings('ignore')
@@ -64,25 +64,25 @@ class TrainModel():
       print(f'LGBM RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
       self.model.booster_.save_model(self.save_path)
 
-    if self.features['model'] == 'tabular_learner':
+    # if self.features['model'] == 'tabular_learner':
 
-      splits = (L(range(int(len(train_df) * test_size), len(train_df))), L(range(int(len(train_df) * test_size))))
+    #   splits = (L(range(int(len(train_df) * test_size), len(train_df))), L(range(int(len(train_df) * test_size))))
 
-      self.to = TabularPandas(train_df.drop(columns = [date_col]),
-                              cat_names = [],
-                              cont_names = [i for i in train_df.drop(columns = [date_col, target_col]).columns],
-                              y_names = target_col,
-                              splits = splits,
-                              y_block = RegressionBlock())
+    #   self.to = TabularPandas(train_df.drop(columns = [date_col]),
+    #                           cat_names = [],
+    #                           cont_names = [i for i in train_df.drop(columns = [date_col, target_col]).columns],
+    #                           y_names = target_col,
+    #                           splits = splits,
+    #                           y_block = RegressionBlock())
 
-      self.dls = self.to.dataloaders(bs = 64)
-      self.model = tabular_learner(self.dls, metrics = rmse)
-      self.model.fit_one_cycle(10)
+    #   self.dls = self.to.dataloaders(bs = 64)
+    #   self.model = tabular_learner(self.dls, metrics = rmse)
+    #   self.model.fit_one_cycle(10)
 
-      test_dl = self.dls.test_dl(Xtest)
-      test_preds, _ = self.model.get_preds(dl = test_dl)
-      print(f'Table Loader RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
-      self.model.export(self.save_path, pickle_module=dill)
+    #   test_dl = self.dls.test_dl(Xtest)
+    #   test_preds, _ = self.model.get_preds(dl = test_dl)
+    #   print(f'Table Loader RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
+    #   self.model.export(self.save_path, pickle_module=dill)
     
     self.features['order'] = self.order
     self.features['threshold'] = np.quantile(test_preds, 0.95)
