@@ -50,7 +50,9 @@ class SimpleDataset:
                                 minute=features['time_features']['minute'])
     new_columns = [col for col in raw_dataset.columns if col not in raw_columns]
     raw_dataset.dropna(subset=new_columns, inplace=True)
-
+    if 'week' in new_columns:
+       raw_dataset['week'] = raw_dataset['week'].astype('int64')
+       
     return raw_dataset
 
   @staticmethod

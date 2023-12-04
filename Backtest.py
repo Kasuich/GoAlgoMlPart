@@ -32,7 +32,8 @@ class Backtest:
                  part_of_balance_for_sell: float=None,
                  sum_for_sell_rur: float=None,
                  sum_for_sell_num: float=None,
-                 sell_all: bool=False):
+                 sell_all: bool=False,
+                 notebook: bool = False):
 
         self.features = features
         self.balance = balance
@@ -55,6 +56,7 @@ class Backtest:
         self.preds = []
         self.prices = []
         self.sygnals = []
+        self.notebook = notebook
 
     def get_preds(self,
                   ticker,
@@ -66,7 +68,7 @@ class Backtest:
 
         self.model = self.features['model']
         model_path = f'{12345678}_{ticker}_{timeframe}_{self.features["model"]}.bin'
-        test_data = SimpleDataset.create_dataset(features=self.features, ticker=ticker, timeframe=timeframe, candles=candles)
+        test_data = SimpleDataset.create_dataset(features=self.features, ticker=ticker, timeframe=timeframe, candles=candles, notebook=self.notebook)
         test_data = test_data.drop(columns=[date_col, target_col])
         self.prices = test_data['close'].values
 

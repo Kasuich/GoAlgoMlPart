@@ -25,7 +25,7 @@ LGBM = lightgbm.sklearn.LGBMRegressor
 
 class TrainModel():
 
-  def __init__(self, features, ticker, timeframe, random_seed=42, candles=10_000):
+  def __init__(self, features, ticker, timeframe, random_seed=42, candles=10_000, notebook: bool = False):
 
     self.seed = random_seed
     self.timeframe = timeframe
@@ -35,7 +35,7 @@ class TrainModel():
     self.save_path = f'{12345678}_{self.ticker}_{self.timeframe}_{self.model}.bin' # Путь для сохранения модели, 12345678 - хэш юзера
     self.order = []
     self.candles = candles
-    self.raw_dataset = SimpleDataset.create_dataset(features=features, ticker=self.ticker, timeframe=self.timeframe, candles=self.candles)
+    self.raw_dataset = SimpleDataset.create_dataset(features=features, ticker=self.ticker, timeframe=self.timeframe, candles=self.candles, notebook=notebook)
 
   def train(self,
             test_size: float = 0.1,

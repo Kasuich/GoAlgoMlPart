@@ -1,7 +1,7 @@
 from TrainModel import TrainModel
 from Backtest import Backtest
 
-tick = 'SBER'
+tick = 'ROSN'
 period = '10m'
 train_candles = 10_000
 backtest_candles = 1_000
@@ -33,7 +33,7 @@ features = {'lags': {'features': ['open', 'close', 'target'],
                               'day_of_week':True,
                               'hour':True,
                               'minute': True},
-            'model': 'catboost'} # выбор один из 'lightgbm', 'tabular_learner'
+            'model': 'lightgbm'} # выбор один из 'lightgbm', 'tabular_learner'
 
 
 
