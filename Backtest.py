@@ -84,7 +84,7 @@ class Backtest:
         if self.features['model'] == 'tabular_learner':
             model = load_learner(model_path, cpu=True, pickle_module=dill)
             test_dl = model.dls.test_dl(test_data)
-            self.preds, _ = self.model.get_preds(dl = test_dl)
+            self.preds, _ = model.get_preds(dl = test_dl)
 
         self.sygnals = (self.preds > np.quantile(self.preds, 0.95)) * 1
 
