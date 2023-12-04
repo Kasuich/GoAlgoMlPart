@@ -15,9 +15,9 @@ warnings.filterwarnings('ignore')
 class SimpleDataset:
 
   @staticmethod
-  def create_dataset(features, ticker, timeframe, candles=10000):
+  def create_dataset(features, ticker, timeframe, candles=10000, notebook: bool = False):
 
-    raw_dataset = SimpleDataset.load_dataset(ticker, timeframe, candles=candles)
+    raw_dataset = SimpleDataset.load_dataset(ticker, timeframe, candles=candles, notebook=notebook)
     raw_columns = list(raw_dataset.columns)
     SimpleDataset.make_dataset(raw_dataset, target_col='close')
     if (features['lags']):
@@ -54,7 +54,7 @@ class SimpleDataset:
     return raw_dataset
 
   @staticmethod
-  def load_dataset(ticker: str, timeframe: str, candles: int = 10000):
+  def load_dataset(ticker: str, timeframe: str, candles: int = 10000, notebook: bool = False):
 
     if timeframe in ['1m', '10m']:
       delta = 10
@@ -75,8 +75,12 @@ class SimpleDataset:
             'end': candle.end,
         }
 
-    def pandas_frame(candles_it):
-        return pd.DataFrame([normalize_row(row) for row in candles_it])
+    if not notebook:
+      def pandas_frame(candles_it):
+          return pd.DataFrame([normalize_row(row) for row in candles_it])
+    else:
+       def pandas_frame(candles_it):
+          return candles_it
 
     date_r = datetime.today()
     date_l = datetime.today() - timedelta(days=delta)
