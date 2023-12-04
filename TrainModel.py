@@ -87,4 +87,4 @@ class TrainModel():
     self.features['order'] = self.order
     self.features['threshold'] = np.quantile(test_preds, 0.95)
     print('Threshold from Xtest', self.features['threshold'])
-    return self.features
+    return self.features # Возвращает новый features с порогом

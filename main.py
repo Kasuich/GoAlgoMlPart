@@ -2,7 +2,7 @@ from TrainModel import TrainModel
 from Backtest import Backtest
 from ModelInference import ModelInference
 
-tick = 'MAGE'
+tick = 'SBER'
 period = '10m'
 train_candles = 10_000
 backtest_candles = 1_000
@@ -34,12 +34,12 @@ features = {'lags': {'features': ['open', 'close', 'target'],
                               'day_of_week':True,
                               'hour':True,
                               'minute': True},
-            'model': 'catboost'} # выбор один из 'lightgbm'
+            'model': 'lightgbm'} # выбор один из 'lightgbm'
 
 
 
 train_model = TrainModel(features, tick, period, candles=train_candles)
-features = train_model.train()
+features = train_model.train() # возвращает новый features с порогом
 
 management_features = {"balance": 100_000,
                        "max_balance_for_trading": 200_000,
