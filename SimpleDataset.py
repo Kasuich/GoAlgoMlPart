@@ -52,7 +52,7 @@ class SimpleDataset:
     raw_dataset.dropna(subset=new_columns, inplace=True)
     if 'week' in new_columns:
        raw_dataset['week'] = raw_dataset['week'].astype('int64')
-       
+
     return raw_dataset
 
   @staticmethod

@@ -25,7 +25,7 @@ LGBM = lightgbm.sklearn.LGBMRegressor
 
 class TrainModel():
 
-  def __init__(self, features, ticker, timeframe, random_seed=42, candles=10_000, notebook: bool = False):
+  def __init__(self, features, ticker, timeframe, random_seed=42, candles=10_000, notebook: bool = False, quantile=0.95):
 
     self.seed = random_seed
     self.timeframe = timeframe
@@ -36,6 +36,7 @@ class TrainModel():
     self.order = []
     self.candles = candles
     self.raw_dataset = SimpleDataset.create_dataset(features=features, ticker=self.ticker, timeframe=self.timeframe, candles=self.candles, notebook=notebook)
+    self.quantile=quantile
 
   def train(self,
             test_size: float = 0.1,
@@ -52,13 +53,15 @@ class TrainModel():
     if self.features['model'] == 'catboost':
       self.model = CatBoostRegressor(eval_metric = 'RMSE', random_seed = self.seed)
       self.model.fit(Xtrain, ytrain, eval_set = (Xtest, ytest), plot = False, verbose = False)
-      print(f'CatBoost RMSE score on validation set: {mean_squared_error(ytest, self.model.predict(Xtest), squared = False)}')
+      test_preds = self.model.predict(Xtest)
+      print(f'CatBoost RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
       self.model.save_model(self.save_path)
 
     if self.features['model'] == 'lightgbm':
       self.model = LGBMRegressor(random_state = self.seed)
       self.model.fit(Xtrain, ytrain, eval_set = (Xtest, ytest), eval_metric = 'RMSE')
-      print(f'LGBM RMSE score on validation set: {mean_squared_error(ytest, self.model.predict(Xtest), squared = False)}')
+      test_preds = self.model.predict(Xtest)
+      print(f'LGBM RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
       self.model.booster_.save_model(self.save_path)
 
     if self.features['model'] == 'tabular_learner':
@@ -80,5 +83,8 @@ class TrainModel():
       test_preds, _ = self.model.get_preds(dl = test_dl)
       print(f'Table Loader RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')
       self.model.export(self.save_path, pickle_module=dill)
-
-    return "successful"
+    
+    self.features['order'] = self.order
+    self.features['threshold'] = np.quantile(test_preds, 0.95)
+    print('Threshold from Xtest', self.features['threshold'])
+    return self.features

@@ -1,7 +1,8 @@
 from TrainModel import TrainModel
 from Backtest import Backtest
+from ModelInference import ModelInference
 
-tick = 'ROSN'
+tick = 'SBER'
 period = '10m'
 train_candles = 10_000
 backtest_candles = 1_000
@@ -38,7 +39,7 @@ features = {'lags': {'features': ['open', 'close', 'target'],
 
 
 train_model = TrainModel(features, tick, period, candles=train_candles)
-train_model.train()
+features = train_model.train()
 
 management_features = {"balance": 100_000,
                        "max_balance_for_trading": 200_000,
@@ -65,3 +66,24 @@ backtest = Backtest(features,
 
 balance = backtest.do_backtest(tick, period, backtest_candles)
 print(balance)
+
+inference = ModelInference(
+    features=features,
+    ticker=tick,
+    user_id='12345678',
+    api_data='amogus',
+    timeframe=period,
+    balance=management_features['balance'],
+    max_balance_for_trading=management_features['max_balance_for_trading'],
+    min_balance_for_trading=management_features['min_balance_for_trading'],
+    part_of_balance_for_buy=management_features['part_of_balance_for_buy'],
+    sum_for_buy_rur=management_features['sum_for_buy_rur'],
+    sum_for_buy_num=management_features['sum_for_buy_num'],
+    part_of_balance_for_sell=management_features['part_of_balance_for_sell'],
+    sum_for_sell_rur=management_features['sum_for_sell_rur'],
+    sum_for_sell_num=management_features['sum_for_sell_num'],
+    sell_all=management_features['sell_all'])
+
+test_data, signal = inference.get_pred_one_candle()
+print(test_data)
+print(signal)
