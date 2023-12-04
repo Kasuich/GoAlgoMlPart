@@ -66,7 +66,6 @@ class Backtest:
                   date_col: str='date',
                   target_col: str='target'):
 
-        self.model = self.features['model']
         model_path = f'{12345678}_{ticker}_{timeframe}_{self.features["model"]}.bin'
         test_data = SimpleDataset.create_dataset(features=self.features, ticker=ticker, timeframe=timeframe, candles=candles, notebook=self.notebook)
         test_data = test_data.drop(columns=[date_col, target_col])
