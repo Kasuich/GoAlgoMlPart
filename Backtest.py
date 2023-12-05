@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Dict, List, Iterable
+import math
 
 import pandas as pd
 import numpy as np
@@ -21,11 +22,30 @@ warnings.filterwarnings('ignore')
 
 class Backtest:
 
+    @staticmethod
+    def calculate_year_income(
+        sum_before: int = None,
+        sum_after: int = None,
+        candle_period: int = None,
+        candle_val: int = None): # сколько свечей на валидации
+
+        if sum_after == sum_before:
+            return 0
+        income = sum_after - sum_before
+        time = candle_val * candle_period  # сколько минут прошло
+        days = math.ceil(time / 785)
+        n = int(365 / days)
+        if sum_after > sum_before:
+            return (income * n + sum_before) / sum_before * 100
+        if sum_after < sum_before:
+            return (income * n) / sum_before * 100
+
     def __init__(self,
                  features,
                  balance: float,
                  max_balance_for_trading: float,
                  min_balance_for_trading: float,
+                 period: str,
                  part_of_balance_for_buy: float=None,
                  sum_for_buy_rur: float=None,
                  sum_for_buy_num: float=None,
@@ -37,6 +57,7 @@ class Backtest:
 
         self.features = features
         self.balance = balance
+        self.start_balance = balance
         self.max_balance = max_balance_for_trading
         self.min_balance = min_balance_for_trading
         self.cur_volume_rur = 0
@@ -57,6 +78,14 @@ class Backtest:
         self.prices = []
         self.sygnals = []
         self.notebook = notebook
+
+        if period == '1m':
+            self.candle_period = 1
+        if period == '10m':
+            self.candle_period = 10
+        if period == '60,':
+            self.candle_period = 60
+
 
     def get_preds(self,
                   ticker,
@@ -152,6 +181,8 @@ class Backtest:
 
     def do_backtest(self, ticker, timeframe, candles=1000):
 
+        self.num_candles = candles
+
         self.get_preds(ticker, timeframe, candles)
 
         for idx in range(len(self.sygnals)):
@@ -174,4 +205,10 @@ class Backtest:
 
         self.balance += self.cur_volume_rur
 
-        return self.balance
+        year_income = Backtest.calculate_year_income(
+            self.start_balance,
+            self.balance,
+            self.candle_period,
+            self.num_candles,
+        )
+        return self.balance, year_income

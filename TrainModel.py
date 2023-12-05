@@ -44,14 +44,15 @@ class TrainModel():
             target_col: str = 'target'):
 
     train_df = self.raw_dataset.copy()
-    Xtrain, Xtest, ytrain, ytest = train_test_split(train_df.drop(columns=[target_col, date_col]),
+    Xtrain, Xtest, ytrain, ytest = train_test_split(train_df.drop(columns=[target_col, date_col]), 
                                                     train_df[target_col].fillna(train_df[target_col].mean()),
+                                                    train_size=(1 - test_size - 0.1),
                                                     test_size=test_size,
                                                     shuffle=False)
     self.order = Xtrain.columns.values
 
     if self.features['model'] == 'catboost':
-      self.model = CatBoostRegressor(eval_metric = 'RMSE', random_seed = self.seed)
+      self.model = CatBoostRegressor(iterations=100, eval_metric = 'RMSE', random_seed = self.seed)
       self.model.fit(Xtrain, ytrain, eval_set = (Xtest, ytest), plot = False, verbose = False)
       test_preds = self.model.predict(Xtest)
       print(f'CatBoost RMSE score on validation set: {mean_squared_error(ytest, test_preds, squared = False)}')

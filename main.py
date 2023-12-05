@@ -2,8 +2,8 @@ from TrainModel import TrainModel
 from Backtest import Backtest
 from ModelInference import ModelInference
 
-tick = 'SBER'
-period = '10m'
+tick = 'YNDX'
+period = '1m'
 train_candles = 10_000
 backtest_candles = 1_000
 
@@ -57,6 +57,7 @@ backtest = Backtest(features,
                     max_balance_for_trading=management_features['max_balance_for_trading'],
                     min_balance_for_trading=management_features['min_balance_for_trading'],
                     part_of_balance_for_buy=management_features['part_of_balance_for_buy'],
+                    period=period,
                     sum_for_buy_rur=management_features['sum_for_buy_rur'],
                     sum_for_buy_num=management_features['sum_for_buy_num'],
                     part_of_balance_for_sell=management_features['part_of_balance_for_sell'],
@@ -64,8 +65,8 @@ backtest = Backtest(features,
                     sum_for_sell_num=management_features['sum_for_sell_num'],
                     sell_all=management_features['sell_all'])
 
-balance = backtest.do_backtest(tick, period, backtest_candles)
-print(balance)
+balance, year_income = backtest.do_backtest(tick, period, backtest_candles)
+print(balance, year_income)
 
 inference = ModelInference(
     features=features,
