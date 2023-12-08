@@ -19,18 +19,19 @@ from backtesting.lib import SignalStrategy, TrailingStrategy
 
 class NewBacktest:
     @staticmethod
-    def to_backtest_format(tradestats: pd.DataFrame) -> pd.DataFrame:
+    def to_backtest_format(tradestats: pd.DataFrame, timestamp: str) -> pd.DataFrame:
         df = pd.DataFrame(
-            {
-                "Open": tradestats["open"],
-                "High": tradestats["high"],
-                "Low": tradestats["low"],
-                "Close": tradestats["close"],
-                "Volume": tradestats["volume"],
-            }
-        )
-
-        df.index = tradestats["date"]
+            {'Open': tradestats['open'],
+            'High': tradestats['high'],
+            'Low': tradestats['low'],
+            'Close': tradestats['close'],
+            'Volume': tradestats['volume']})
+        
+        # WARNING! KILL THAT WITH FIRE!
+        if timestamp == "10m":
+            tradestats["date"] = tradestats["date"] + timedelta(seconds=1)
+        
+        df.index = tradestats['date']
 
         return df
 
@@ -165,7 +166,7 @@ class NewBacktest:
             )
             self.SIGNALS[self.SIGNALS == 0] = -1
 
-        dataset = NewBacktest.to_backtest_format(dataset)
+        dataset = NewBacktest.to_backtest_format(dataset, timestamp=self.timestamp)
 
         strategy = NewBacktest.create_strategy_class(
             self.SIGNALS,
