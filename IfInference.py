@@ -231,6 +231,32 @@ class IfInference():
                 "time_features": False,
             }
         
+    def predict_candles_dataframe(self, candles_df: pd.DataFrame) -> np.ndarray:
+        df = candles_df.copy()
+        signals = pd.DataFrame({"signal": [0] * len(df)})
+        signals.reset_index(drop=True, inplace=True)
+        
+        for feat in self.IF_features:
+            
+            if feat["type"] == "and":
+                and_signal = pd.DataFrame({"signal": [1] * len(df)})
+                for and_feat in feat["blocks"]:
+                    tmp_signal = self.process_if_block(
+                        df=df,
+                        block=and_feat,
+                    )
+                    and_signal["signal"] = and_signal["signal"].astype('int') & tmp_signal.iloc[:, 0].astype('int')
+                signals["signal"] = signals["signal"].astype('int') | and_signal["signal"].astype('int')
+
+            if feat["type"] == "if":
+                tmp_signal = self.process_if_block(
+                    df=df,
+                    block=feat,
+                )
+                signals["signal"] = signals["signal"].astype('int') | tmp_signal.iloc[:, 0].astype('int')
+
+        return signals.signal.values
+
         
     def predict_n_last_candles(self, candles: int = 1_000) -> tp.Tuple[pd.DataFrame, np.ndarray]:
 

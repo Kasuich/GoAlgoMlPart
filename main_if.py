@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 from IfInference import IfInference
+from SimpleDataset import SimpleDataset
 
 ticker = "YNDX"
 timestamp = "1m"
@@ -71,11 +72,45 @@ IF_features_example = [
     }
 ]
 
+rsi_periods = [2, 5, 10, 15, 20, 30, 50]
+
+candles_periods = [2, 5, 7, 10, 14, 21, 30, 100]
+
+average_periods = [2, 5, 10, 15, 50, 100]
+
+average_features = ["close", "high", "low", "open", "value", "volume"]
+
+features = {
+        "lags": False,
+        "cma": {"features": average_features},
+        "sma": {"features": average_features, "period": average_periods},
+        "ema": {"features": average_features, "period": average_periods},
+        "green_candles_ratio": {"period": candles_periods},
+        "red_candles_ratio": {"period": candles_periods},
+        "rsi": {"period": rsi_periods},
+        "macd": False,
+        "bollinger": False,
+        "time_features": False,
+    }
+
+test_df = SimpleDataset.create_dataset(
+    features=features,
+    ticker=ticker,
+    timeframe=timestamp,
+    candles=5000,
+)
+
 if_model = IfInference(
     IF_features=IF_features_example,
     ticker=ticker,
     timestamp=timestamp,
 )
+
+test_signals = if_model.predict_candles_dataframe(
+    test_df
+)
+
+print(f"test_df size: {len(test_df)}, test_signals size: {len(test_signals)}")
 
 last_100_candles, signals = if_model.predict_n_last_candles(
     candles=100
