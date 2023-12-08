@@ -272,12 +272,3 @@ class IfInference():
         candle, signal = self.predict_n_last_candles(candles=1)
         signal = signal[0]
         return candle, signal
-            
-            
-
-                    
-
-        
-    
-
-    

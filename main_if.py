@@ -86,4 +86,3 @@ print(last_100_candles.date.max(), len(signals), signals.sum())
 last_1_candles, signals = if_model.predict_one_last_candle()
 
 print(last_1_candles.date.max(), signals)
-
