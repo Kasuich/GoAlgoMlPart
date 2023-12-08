@@ -5,7 +5,7 @@ import math
 import pandas as pd
 import numpy as np
 
-from SimpleDataset import SimpleDataset
+from .SimpleDataset import SimpleDataset
 
 # import dill
 
@@ -15,19 +15,22 @@ from lightgbm import LGBMRegressor
 import catboost
 import lightgbm
 from sklearn.metrics import mean_squared_error
+
 # from fastai.tabular.all import *
 import warnings
 import lightgbm as lgb
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
+
 
 class Backtest:
-
     @staticmethod
     def calculate_year_income(
         sum_before: int = None,
         sum_after: int = None,
         candle_period: int = None,
-        candle_val: int = None): # сколько свечей на валидации
+        candle_val: int = None,
+    ):  # сколько свечей на валидации
 
         if sum_after == sum_before:
             return 0
@@ -40,20 +43,22 @@ class Backtest:
         if sum_after < sum_before:
             return (income * n) / sum_before * 100
 
-    def __init__(self,
-                 features,
-                 balance: float,
-                 max_balance_for_trading: float,
-                 min_balance_for_trading: float,
-                 period: str,
-                 part_of_balance_for_buy: float=None,
-                 sum_for_buy_rur: float=None,
-                 sum_for_buy_num: float=None,
-                 part_of_balance_for_sell: float=None,
-                 sum_for_sell_rur: float=None,
-                 sum_for_sell_num: float=None,
-                 sell_all: bool=False,
-                 notebook: bool = False):
+    def __init__(
+        self,
+        features,
+        balance: float,
+        max_balance_for_trading: float,
+        min_balance_for_trading: float,
+        period: str,
+        part_of_balance_for_buy: float = None,
+        sum_for_buy_rur: float = None,
+        sum_for_buy_num: float = None,
+        part_of_balance_for_sell: float = None,
+        sum_for_sell_rur: float = None,
+        sum_for_sell_num: float = None,
+        sell_all: bool = False,
+        notebook: bool = False,
+    ):
 
         self.features = features
         self.balance = balance
@@ -79,33 +84,40 @@ class Backtest:
         self.sygnals = []
         self.notebook = notebook
 
-        if period == '1m':
+        if period == "1m":
             self.candle_period = 1
-        if period == '10m':
+        if period == "10m":
             self.candle_period = 10
-        if period == '60,':
+        if period == "60,":
             self.candle_period = 60
 
-
-    def get_preds(self,
-                  ticker,
-                  timeframe,
-                  seed=42,
-                  candles=1000,
-                  date_col: str='date',
-                  target_col: str='target'):
+    def get_preds(
+        self,
+        ticker,
+        timeframe,
+        seed=42,
+        candles=1000,
+        date_col: str = "date",
+        target_col: str = "target",
+    ):
 
         model_path = f'{12345678}_{ticker}_{timeframe}_{self.features["model"]}.bin'
-        test_data = SimpleDataset.create_dataset(features=self.features, ticker=ticker, timeframe=timeframe, candles=candles, notebook=self.notebook)
+        test_data = SimpleDataset.create_dataset(
+            features=self.features,
+            ticker=ticker,
+            timeframe=timeframe,
+            candles=candles,
+            notebook=self.notebook,
+        )
         test_data = test_data.drop(columns=[date_col, target_col])
-        self.prices = test_data['close'].values
+        self.prices = test_data["close"].values
 
-        if self.features['model'] == 'catboost':
-            model = CatBoostRegressor(eval_metric = 'RMSE', random_seed=seed)
+        if self.features["model"] == "catboost":
+            model = CatBoostRegressor(eval_metric="RMSE", random_seed=seed)
             model.load_model(model_path)
             self.preds = model.predict(test_data)
 
-        if self.features['model'] == 'lightgbm':
+        if self.features["model"] == "lightgbm":
             model = lgb.Booster(model_file=model_path)
             self.preds = model.predict(test_data)
 
@@ -116,19 +128,18 @@ class Backtest:
 
         self.sygnals = (self.preds > np.quantile(self.preds, 0.95)) * 1
 
-
     def buy(self, price: float) -> str:
 
-        if (self.part_of_balance_for_buy):
+        if self.part_of_balance_for_buy:
             self.num_for_trade = self.balance * self.part_of_balance_for_buy // price
-        elif (self.sum_for_buy_rur):
+        elif self.sum_for_buy_rur:
             self.num_for_trade = self.sum_for_buy_rur // price
-        elif (self.sum_for_buy_num):
+        elif self.sum_for_buy_num:
             self.num_for_trade = self.sum_for_buy_num
         else:
             return "error"
 
-        if (self.balance - self.num_for_trade * price > 0):
+        if self.balance - self.num_for_trade * price > 0:
 
             self.cur_volume_num += self.num_for_trade
             self.cur_volume_rur = self.cur_volume_num * price
@@ -144,15 +155,17 @@ class Backtest:
 
     def sell(self, price: float) -> str:
 
-        if (self.cur_volume_num > 0):
+        if self.cur_volume_num > 0:
 
-            if (self.part_of_balance_for_sell):
-                self.num_for_trade = self.balance * self.part_of_balance_for_sell // price
-            elif (self.sum_for_sell_rur):
+            if self.part_of_balance_for_sell:
+                self.num_for_trade = (
+                    self.balance * self.part_of_balance_for_sell // price
+                )
+            elif self.sum_for_sell_rur:
                 self.num_for_trade = self.sum_for_sell_rur // price
-            elif (self.sum_for_sell_num):
+            elif self.sum_for_sell_num:
                 self.num_for_trade = self.sum_for_sell_num
-            elif (self.sell_all):
+            elif self.sell_all:
                 self.num_for_trade = self.cur_volume_num
             else:
                 return "error"
@@ -170,10 +183,10 @@ class Backtest:
 
     def change_parameters(self) -> str:
 
-        if (self.balance < self.min_balance):
+        if self.balance < self.min_balance:
             return "min_balance"
 
-        elif (self.balance > self.max_balance):
+        elif self.balance > self.max_balance:
             return "max_balance"
 
         else:
@@ -186,13 +199,13 @@ class Backtest:
         self.get_preds(ticker, timeframe, candles)
 
         for idx in range(len(self.sygnals)):
-            status = ''
-            if (self.sygnals[idx]):
+            status = ""
+            if self.sygnals[idx]:
                 status = self.buy(self.prices[idx])
             else:
                 status = self.sell(self.prices[idx])
 
-            if ((status == 'min_balance') or (status == 'max_balance')):
+            if (status == "min_balance") or (status == "max_balance"):
                 break
 
             # print(self.sygnals[idx], self.prices[idx])
