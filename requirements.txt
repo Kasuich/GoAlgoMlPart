@@ -4,3 +4,4 @@ scikit-learn
 catboost
 lightgbm
 moexalgo
+backtesting
