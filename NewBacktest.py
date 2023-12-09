@@ -28,8 +28,7 @@ class NewBacktest:
             'Volume': tradestats['volume']})
         
         # WARNING! KILL THAT WITH FIRE!
-        if timestamp == "10m":
-            tradestats["date"] = tradestats["date"] + timedelta(seconds=1)
+        tradestats["date"] = tradestats["date"].dt.round("min")
         
         df.index = tradestats['date']
 
