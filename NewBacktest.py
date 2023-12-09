@@ -112,7 +112,7 @@ class NewBacktest:
     def __init__(
         self,
         type: tp.Literal["if_model", "ml_model"],
-        model_id: str,
+        model_id: str | None,
         ticker: str,
         timestamp: tp.Literal["1m", "10m", "60m"],
         part_of_sum_for_buy: float,
@@ -120,8 +120,7 @@ class NewBacktest:
         start_sum: float,
         perc_for_stop: float,
         model_features: tp.Dict[str, tp.Any] | None = None,
-        IF_features: tp.Dict[tp.Literal["and", "if"], tp.Dict[str, tp.Any]]
-        | None = None,
+        IF_features: dict[str, tp.Any] | None = None,
         notebook: bool = False,
     ) -> None:
         self.model_id = model_id
@@ -184,5 +183,5 @@ class NewBacktest:
 
         stats = bt.run()
 
-        bt.plot(filename=html_save_path)
+        bt.plot(filename=html_save_path, open_browser=False)
         return stats
