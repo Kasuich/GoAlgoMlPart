@@ -5,3 +5,4 @@ catboost
 lightgbm
 moexalgo
 backtesting
+termcolor

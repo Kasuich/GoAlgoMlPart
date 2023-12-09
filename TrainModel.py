@@ -1,10 +1,13 @@
 from __future__ import annotations
 from typing import Dict, List, Iterable
+import typing as tp
 
 import pandas as pd
 import numpy as np
 
 from .SimpleDataset import SimpleDataset
+
+from termcolor import colored
 
 # import dill
 
@@ -27,6 +30,24 @@ LGBM = lightgbm.sklearn.LGBMRegressor
 
 
 class TrainModel:
+    @staticmethod
+    def get_samp_descr_for_regression(
+        df: pd.DataFrame,
+        name: str,
+        feature_cols: pd.Index | tp.List[str],
+        date_col: str = 'date',
+        target_col: str = 'target',
+    ) -> None:
+            
+        print(colored(f'{name:}', None, attrs=['bold']))
+        print('Period from:', df[date_col].min(), 'to', df[date_col].max())
+        print('Target mean:', round(df[target_col].mean(), 6))
+        print('Target std:', round(df[target_col].std(), 6))
+        print('Target max:', round(df[target_col].max(), 6))
+        print('Target min:', round(df[target_col].min(), 6))
+        print('Shape of sample:', df[feature_cols].shape)
+        print('--------------------------------------------------------------------')
+
     def __init__(
         self,
         features,
@@ -55,6 +76,7 @@ class TrainModel:
             notebook=notebook,
         )
         self.quantile = quantile
+        self.notebook = notebook
 
     def train(
         self, test_size: float = 0.1, date_col: str = "date", target_col: str = "target"
@@ -69,6 +91,38 @@ class TrainModel:
             shuffle=False,
         )
         self.order = Xtrain.columns.values
+       
+        if self.notebook:
+
+            Xtrain_descr, Xtest_descr = train_test_split(
+                train_df,
+                train_size=(1 - test_size - 0.1),
+                test_size=test_size,
+                shuffle=False,
+            )
+
+            feature_cols = [col for col in Xtrain_descr if col not in [target_col, date_col]]
+            TrainModel.get_samp_descr_for_regression(
+                df=Xtrain_descr,
+                name="train",
+                feature_cols=feature_cols,
+                date_col=date_col,
+                target_col=target_col,
+            )
+            TrainModel.get_samp_descr_for_regression(
+                df=Xtest_descr,
+                name="valid",
+                feature_cols=feature_cols,
+                date_col=date_col,
+                target_col=target_col,
+            )
+            TrainModel.get_samp_descr_for_regression(
+                df=train_df.iloc[len(Xtrain_descr) + len(Xtest_descr):],
+                name="hold-out for backtest",
+                feature_cols=feature_cols,
+                date_col=date_col,
+                target_col=target_col,
+            )
 
         if self.features["model"] == "catboost":
             self.model = CatBoostRegressor(
